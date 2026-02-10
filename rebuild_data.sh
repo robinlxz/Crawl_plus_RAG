@@ -10,7 +10,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}>>> Starting Data Rebuild Process (Crawl + Index)...${NC}"
+echo -e "${GREEN}>>> Starting Data Rebuild Process (Crawl + Process + Index)...${NC}"
 
 # Check for venv
 if [ ! -d "venv" ]; then
@@ -21,11 +21,15 @@ fi
 VENV_PYTHON="./venv/bin/python"
 
 # 1. Run Crawler
-echo -e "${YELLOW}[1/2] Running Crawler...${NC}"
+echo -e "${YELLOW}[1/3] Running Crawler...${NC}"
 $VENV_PYTHON src/crawler/byteplus_crawler.py
 
-# 2. Run Index Builder
-echo -e "${YELLOW}[2/2] Building Vector Index...${NC}"
+# 2. Run Processor (Cleaning & Chunking)
+echo -e "${YELLOW}[2/3] Processing Data...${NC}"
+$VENV_PYTHON src/processor/byteplus_parser.py
+
+# 3. Run Index Builder
+echo -e "${YELLOW}[3/3] Building Vector Index...${NC}"
 $VENV_PYTHON src/retrieval/build_index.py
 
 echo -e "${GREEN}>>> Data Rebuild Complete!${NC}"
