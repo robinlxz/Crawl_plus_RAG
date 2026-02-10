@@ -56,23 +56,21 @@ if [ ! -f ".env" ]; then
     exit 1
 fi
 
-# 5. Data Initialization (Crawler & Indexing)
+# 5. Data Initialization (Call rebuild_data.sh)
 echo -e "${YELLOW}[5/6] Initializing RAG data...${NC}"
 INDEX_FILE="data/byteplus.index"
 
 if [ -f "$INDEX_FILE" ]; then
-    echo "Index file exists. Skipping crawling and indexing."
-    echo "To force rebuild, run: rm $INDEX_FILE"
+    echo "Index file exists. Skipping initial crawl/index."
+    echo "To force rebuild, run: ./rebuild_data.sh"
 else
-    echo "Index not found. Starting fresh build..."
-    
-    # Run Crawler
-    echo ">>> Running Crawler..."
-    $VENV_PYTHON src/crawler/byteplus_crawler.py
-    
-    # Run Index Builder
-    echo ">>> Building Vector Index..."
-    $VENV_PYTHON src/retrieval/build_index.py
+    echo "Index not found. Calling rebuild_data.sh..."
+    if [ -x "./rebuild_data.sh" ]; then
+        ./rebuild_data.sh
+    else
+        echo -e "${RED}Error: rebuild_data.sh not found or not executable.${NC}"
+        exit 1
+    fi
 fi
 
 # 6. Systemd Service Setup
