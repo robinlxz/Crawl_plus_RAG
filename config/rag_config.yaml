@@ -1,0 +1,24 @@
+# Current active provider
+provider: deepseek
+
+# Embedding Configuration
+embedding:
+  model_name: "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+
+# Configuration for Doubao (BytePlus)
+doubao:
+  api_key_env: DOUBAO_API_KEY
+  # Replace with your own endpoint (e.g. https://ark.cn-beijing.volces.com/api/v3)
+  base_url: "<YOUR_BASE_URL>" 
+  # Replace with your own Endpoint ID (e.g. ep-2025xxxxxx-xxxxx)
+  model: "<YOUR_ENDPOINT_ID>" 
+  temperature: 0.1
+  max_tokens: 1024
+
+# Configuration for DeepSeek (via BytePlus/Ark)
+deepseek:
+  api_key_env: DEEPSEEK_API_KEY 
+  base_url: "<YOUR_BASE_URL>"
+  model: "<YOUR_ENDPOINT_ID>"
+  temperature: 0.0
+  max_tokens: 2048

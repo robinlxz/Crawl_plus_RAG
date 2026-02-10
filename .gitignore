@@ -1,0 +1,17 @@
+.env
+__pycache__/
+*.pyc
+.DS_Store
+
+# Ignore data contents but keep directories
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Ignore index and metadata
+*.index
+*.json
+
+# Allow specific config/source files
+!data/sources/*.json
