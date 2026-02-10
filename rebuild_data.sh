@@ -20,9 +20,34 @@ fi
 
 VENV_PYTHON="./venv/bin/python"
 
-# 1. Run Crawler
-echo -e "${YELLOW}[1/3] Running Crawler...${NC}"
-$VENV_PYTHON src/crawler/byteplus_crawler.py
+# 1. Run Crawler (Conditional)
+RAW_DATA_DIR="data/raw/byteplus_ecs"
+SHOULD_CRAWL=true
+
+if [ -d "$RAW_DATA_DIR" ] && [ "$(ls -A $RAW_DATA_DIR 2>/dev/null)" ]; then
+    echo -e "${YELLOW}Raw data detected in $RAW_DATA_DIR.${NC}"
+    read -p "Do you want to re-crawl data? (y/N): " choice
+    case "$choice" in 
+        y|Y ) 
+            echo "Re-crawling..."
+            SHOULD_CRAWL=true
+            ;;
+        * ) 
+            echo "Skipping crawler..."
+            SHOULD_CRAWL=false
+            ;;
+    esac
+else
+    echo "No raw data found. Starting crawler..."
+    SHOULD_CRAWL=true
+fi
+
+if [ "$SHOULD_CRAWL" = true ]; then
+    echo -e "${YELLOW}[1/3] Running Crawler...${NC}"
+    $VENV_PYTHON src/crawler/byteplus_crawler.py
+else
+    echo -e "${YELLOW}[1/3] Crawler Skipped.${NC}"
+fi
 
 # 2. Run Processor (Cleaning & Chunking)
 echo -e "${YELLOW}[2/3] Processing Data...${NC}"
