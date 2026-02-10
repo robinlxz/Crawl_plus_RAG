@@ -1,13 +1,16 @@
 #!/bin/bash
 set -e  # Exit immediately if a command exits with a non-zero status.
 
+# Ensure we are in the script's directory (project root)
+cd "$(dirname "$0")"
+
 # Colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}>>> Starting ECS Deployment Script for BytePlus RAG Assistant...${NC}"
+echo -e "${GREEN}>>> Starting ECS Deployment Script (Systemd Version) for BytePlus RAG Assistant...${NC}"
 
 # 1. System Check & Dependencies
 echo -e "${YELLOW}[1/6] Checking system dependencies...${NC}"
@@ -31,14 +34,16 @@ else
 fi
 
 # Use absolute path for python executable in venv
-VENV_PYTHON="./venv/bin/python"
-VENV_PIP="./venv/bin/pip"
+PROJECT_ROOT=$(pwd)
+VENV_PYTHON="$PROJECT_ROOT/venv/bin/python"
+VENV_PIP="$PROJECT_ROOT/venv/bin/pip"
+STREAMLIT_BIN="$PROJECT_ROOT/venv/bin/streamlit"
 
 # 3. Install Python Dependencies
 echo -e "${YELLOW}[3/6] Installing Python requirements...${NC}"
 $VENV_PIP install --upgrade pip
-# Use Tsinghua mirror for speed in China regions (optional, can be removed if global)
-$VENV_PIP install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+# Removed Tsinghua mirror for overseas ECS
+$VENV_PIP install -r requirements.txt
 
 # 4. Environment Configuration Check
 echo -e "${YELLOW}[4/6] Checking configuration...${NC}"
@@ -70,19 +75,43 @@ else
     $VENV_PYTHON src/retrieval/build_index.py
 fi
 
-# 6. Start Service
-echo -e "${YELLOW}[6/6] Starting Streamlit Service...${NC}"
+# 6. Systemd Service Setup
+echo -e "${YELLOW}[6/6] Configuring Systemd Service...${NC}"
 
-# Kill existing streamlit process if running
-if pgrep -f "streamlit run src/web_ui.py" > /dev/null; then
-    echo "Stopping existing RAG service..."
-    pkill -f "streamlit run src/web_ui.py"
-    sleep 2
+SERVICE_FILE="rag.service"
+TARGET_SERVICE_PATH="/etc/systemd/system/rag.service"
+
+if [ ! -f "$SERVICE_FILE" ]; then
+    echo -e "${RED}Error: $SERVICE_FILE not found in current directory.${NC}"
+    exit 1
 fi
 
-# Start in background with nohup
-nohup ./venv/bin/streamlit run src/web_ui.py --server.port 80 --server.address 0.0.0.0 > rag_service.log 2>&1 &
+# Get current user to run the service
+CURRENT_USER=$(whoami)
+echo "Service will run as user: $CURRENT_USER"
+
+# Update paths and user in rag.service dynamically
+echo "Updating service file paths to: $PROJECT_ROOT"
+# Create a temporary service file with correct paths and user
+sed "s|WorkingDirectory=.*|WorkingDirectory=$PROJECT_ROOT|g" $SERVICE_FILE > rag.service.tmp
+sed "s|ExecStart=.*|ExecStart=$STREAMLIT_BIN run src/web_ui.py --server.port 8501 --server.address 0.0.0.0|g" rag.service.tmp > rag.service.tmp2
+sed "s|User=.*|User=$CURRENT_USER|g" rag.service.tmp2 > rag.service.tmp3
+sed "s|EnvironmentFile=.*|EnvironmentFile=$PROJECT_ROOT/.env|g" rag.service.tmp3 > rag.service.final
+
+echo "Installing service to $TARGET_SERVICE_PATH..."
+sudo mv rag.service.final $TARGET_SERVICE_PATH
+rm rag.service.tmp rag.service.tmp2 rag.service.tmp3
+
+# Reload systemd and enable service
+echo "Reloading systemd daemon..."
+sudo systemctl daemon-reload
+echo "Enabling rag.service..."
+sudo systemctl enable rag.service
+echo "Restarting rag.service..."
+sudo systemctl restart rag.service
 
 echo -e "${GREEN}>>> Deployment Complete!${NC}"
-echo -e "Service is running in background. Logs are being written to ${YELLOW}rag_service.log${NC}"
-echo -e "Access your service at: http://<YOUR_ECS_IP>"
+echo -e "Service status:"
+sudo systemctl status rag.service --no-pager | head -n 10
+echo -e "\nLogs available at: /var/log/rag_assistant.log"
+echo -e "Access your service at: http://<YOUR_ECS_IP>:8501"

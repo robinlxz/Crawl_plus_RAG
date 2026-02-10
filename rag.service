@@ -1,0 +1,23 @@
+[Unit]
+Description=BytePlus RAG Assistant Web Service
+After=network.target
+
+[Service]
+# User will be dynamically replaced by deploy_ecs.sh
+User=root
+Type=simple
+
+# Environment variables
+EnvironmentFile=/root/rag_project_standalone/.env
+
+# Paths will be dynamically replaced by deploy_ecs.sh
+WorkingDirectory=/root/rag_project_standalone
+ExecStart=/root/rag_project_standalone/venv/bin/streamlit run src/web_ui.py --server.port 8501 --server.address 0.0.0.0
+
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/rag_assistant.log
+StandardError=append:/var/log/rag_assistant.error.log
+
+[Install]
+WantedBy=multi-user.target
