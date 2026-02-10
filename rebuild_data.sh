@@ -51,7 +51,7 @@ fi
 
 # 2. Run Processor (Cleaning & Chunking)
 echo -e "${YELLOW}[2/3] Processing Data...${NC}"
-$VENV_PYTHON src/processor/byteplus_parser.py
+$VENV_PYTHON src/processor/simple_rag_processor.py
 
 # 3. Run Index Builder
 echo -e "${YELLOW}[3/3] Building Vector Index...${NC}"
