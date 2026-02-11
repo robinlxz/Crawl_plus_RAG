@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import List, Dict
+from typing import List, Dict, Any
 
 # Add src to path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -18,14 +18,23 @@ class RAGGenerator:
             
         self.client = LLMClient(config_path)
         
-    def answer(self, question: str, retrieved_chunks: List[Dict]) -> str:
+    def answer(self, question: str, retrieved_chunks: List[Dict]) -> Dict[str, Any]:
         """
         End-to-end generation: Prompt Build -> LLM Call -> Answer
+        Returns:
+            Dict containing:
+            - 'answer': str
+            - 'debug': Dict containing 'final_messages'
         """
         # 1. Build Prompt
         messages = build_rag_prompt(question, retrieved_chunks)
         
         # 2. Call LLM
-        answer = self.client.generate(messages)
+        answer_text = self.client.generate(messages)
         
-        return answer
+        return {
+            "answer": answer_text,
+            "debug": {
+                "final_messages": messages
+            }
+        }

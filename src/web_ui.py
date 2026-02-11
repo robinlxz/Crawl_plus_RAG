@@ -94,20 +94,23 @@ if prompt := st.chat_input("Ask a question about ECS..."):
             st.write("Searching knowledge base...")
             start_t = time.time()
             results = searcher.search(prompt, top_k=top_k)
-            retrieve_time = time.time() - start_t
-            st.write(f"Found {len(results)} documents in {retrieve_time:.3f}s.")
+            retrieve_time = (time.time() - start_t) * 1000 # ms
+            st.write(f"Found {len(results)} documents in {retrieve_time:.0f}ms.")
             
             # 2. Generation
             st.write("Generating answer...")
             start_t = time.time()
-            answer = generator.answer(prompt, results)
-            gen_time = time.time() - start_t
+            response = generator.answer(prompt, results)
+            gen_time = (time.time() - start_t) * 1000 # ms
             
-            status.update(label=f"Done! (Total: {retrieve_time + gen_time:.2f}s)", state="complete", expanded=False)
+            answer = response["answer"]
+            debug_info = response["debug"]
+            
+            status.update(label=f"Done! (Total: {(retrieve_time + gen_time):.0f}ms)", state="complete", expanded=False)
             
         message_placeholder.markdown(answer)
         
-        # Prepare sources for history
+        # Prepare sources for history (Simplified for display)
         sources_meta = []
         for res in results:
             sources_meta.append({
@@ -117,16 +120,44 @@ if prompt := st.chat_input("Ask a question about ECS..."):
                 "content": res.get("content", "")
             })
             
-        # Display Sources immediately
-        with st.expander("🔍 Retrieved Context (Source Documents)"):
-            for idx, source in enumerate(sources_meta):
-                # Make title a clickable link
-                st.markdown(f"**{idx+1}. [{source['title']}]({source['url']})** (Score: {source['score']:.4f})")
-                st.caption(source['content'][:300] + "...")
+        # ---------------------------------------------------------
+        # P1: Enhanced Debug Console
+        # ---------------------------------------------------------
+        with st.expander("🛠️ Debug Console", expanded=False):
+            tab1, tab2, tab3 = st.tabs(["🔍 Retrieval", "🧠 Prompt", "⏱️ Stats"])
+            
+            # Tab 1: Retrieval
+            with tab1:
+                st.caption(f"Top-{len(results)} Retrieved Chunks")
+                for idx, res in enumerate(results):
+                    with st.container():
+                        col1, col2 = st.columns([1, 4])
+                        with col1:
+                            st.metric(f"Rank {idx+1}", f"{res.get('score', 0.0):.4f}")
+                        with col2:
+                            source = res.get('source_meta', {})
+                            st.markdown(f"**Source:** [{source.get('title', 'Untitled')}]({source.get('url', '#')})")
+                            st.markdown(f"**Block ID:** `{res.get('block_id', 'N/A')}`")
+                            with st.expander("Show Content", expanded=False):
+                                st.code(res.get('content', ''), language='text')
+                        st.divider()
+            
+            # Tab 2: Prompt
+            with tab2:
+                st.caption("Final messages sent to LLM")
+                st.json(debug_info.get("final_messages", []))
                 
+            # Tab 3: Stats
+            with tab3:
+                col1, col2, col3 = st.columns(3)
+                col1.metric("Retrieval Latency", f"{retrieve_time:.0f} ms")
+                col2.metric("Generation Latency", f"{gen_time:.0f} ms")
+                col3.metric("Total Latency", f"{(retrieve_time + gen_time):.0f} ms")
+
     # Add assistant message to chat history
     st.session_state.messages.append({
         "role": "assistant", 
         "content": answer,
-        "sources": sources_meta
+        "sources": sources_meta,
+        "debug": debug_info # Store debug info in history too
     })
