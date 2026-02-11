@@ -102,12 +102,57 @@ def process_raw_file(file_path: str) -> List[Dict]:
         title = data["title"]
         parent = data["parent"]
     else:
-        # Fallback: simple text extraction if structured parsing fails
+        # Fallback: Robust HTML cleaning
         soup = BeautifulSoup(html, "html.parser")
+        
+        # 1. Remove standard noise tags
+        for tag in soup(["script", "style", "nav", "header", "footer", "aside", "noscript", "iframe"]):
+            tag.decompose()
+            
+        # 2. Remove elements by class/id heuristics (Sidebar, Menu, TOC)
+        # Keywords that strongly indicate noise
+        noise_keywords = ["sidebar", "menu", "toc", "navigation", "breadcrumb", "footer", "header"]
+        
+        for element in soup.find_all(attrs={"class": True}):
+            classes = element.get("class")
+            # Handle list or string class attribute
+            if isinstance(classes, list):
+                classes = " ".join(classes).lower()
+            else:
+                classes = str(classes).lower()
+                
+            if any(keyword in classes for keyword in noise_keywords):
+                # Double check: Don't delete if it looks like main content
+                if "content" not in classes and "article" not in classes:
+                    element.decompose()
+                    
+        # 3. Try to locate main content container
+        # Common patterns: 'markdown-body', 'doc-content', 'article-content'
+        content_container = None
+        
+        # Priority 1: Specific known classes for BytePlus/Doc sites
+        target_classes = ["markdown-body", "doc-content", "article-content", "main-content"]
+        for cls in target_classes:
+            content_container = soup.find(class_=lambda x: x and cls in x)
+            if content_container:
+                break
+                
+        # Priority 2: Generic 'main' tag
+        if not content_container:
+            content_container = soup.find("main")
+            
+        # Priority 3: Fallback to Body (already cleaned)
+        if not content_container:
+            content_container = soup.body if soup.body else soup
+
+        # 4. Extract Title if missing
         if soup.title:
-            title = soup.title.string.split("--")[0].strip()
-        # Try to find main content div if possible, or just get text
-        text = soup.get_text(separator="\n", strip=True)
+            extracted_title = soup.title.string
+            if extracted_title:
+                 title = extracted_title.split("--")[0].strip()
+
+        # 5. Get Text
+        text = content_container.get_text(separator="\n", strip=True)
 
     # Fallback: Extract title from URL if missing or Unknown
     if not title or title == "Unknown":
