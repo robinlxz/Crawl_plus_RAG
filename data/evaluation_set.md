@@ -38,3 +38,14 @@
 **User Query**: "What is the difference between ESSD and local SSD?"
 **Expected Intent**: 存储类型对比。
 **Expected Key Concepts**: IOPS, Latency, Persistence (ESSD 持久化 vs Local SSD 易失性).
+
+## 5. 边界测试与常识回退 (Out-of-Domain & Fallback)
+
+### Q6: WordPress 性能慢
+**User Query**: "My backend service (worldpress) seems to be very slow on your ECS, is there anything wrong with the server?"
+**Expected Intent**: 寻求故障排查帮助，即使文档未覆盖 WordPress。
+**Expected Key Concepts**: CPU/Memory/Disk Monitoring, Network Latency, General Troubleshooting.
+**Current Performance**:
+- **Retrieval**: 召回了时间同步、维护等无关文档。
+- **Generation**: 5/5 (优秀). 明确指出文档未覆盖，但给出了通用排查建议。
+- **Note**: 此案例验证了 "Helpfulness" 优于 "Strict Factuality" 的场景。
