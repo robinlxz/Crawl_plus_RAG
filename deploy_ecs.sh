@@ -92,7 +92,7 @@ echo "Service will run as user: $CURRENT_USER"
 echo "Updating service file paths to: $PROJECT_ROOT"
 # Create a temporary service file with correct paths and user
 sed "s|WorkingDirectory=.*|WorkingDirectory=$PROJECT_ROOT|g" $SERVICE_FILE > rag.service.tmp
-sed "s|ExecStart=.*|ExecStart=$STREAMLIT_BIN run src/web_ui.py --server.port 8501 --server.address 0.0.0.0|g" rag.service.tmp > rag.service.tmp2
+sed "s|ExecStart=.*|ExecStart=$STREAMLIT_BIN run src/web_ui.py --server.port 80 --server.address 0.0.0.0|g" rag.service.tmp > rag.service.tmp2
 sed "s|User=.*|User=$CURRENT_USER|g" rag.service.tmp2 > rag.service.tmp3
 sed "s|EnvironmentFile=.*|EnvironmentFile=$PROJECT_ROOT/.env|g" rag.service.tmp3 > rag.service.final
 
@@ -112,4 +112,4 @@ echo -e "${GREEN}>>> Deployment Complete!${NC}"
 echo -e "Service status:"
 sudo systemctl status rag.service --no-pager | head -n 10
 echo -e "\nLogs available at: /var/log/rag_assistant.log"
-echo -e "Access your service at: http://<YOUR_ECS_IP>:8501"
+echo -e "Access your service at: http://<YOUR_ECS_IP>"

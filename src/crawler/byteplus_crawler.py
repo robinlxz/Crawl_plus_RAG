@@ -8,7 +8,8 @@ from typing import List, Dict, Set
 from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 
-MAX_PAGES_PER_SOURCE =800
+# This would be 800 for current ECS docs, here 10 is for test
+MAX_PAGES_PER_SOURCE = 800
 
 def load_config(config_path: str) -> List[Dict]:
     with open(config_path, "r", encoding="utf-8") as f:
