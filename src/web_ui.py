@@ -2,11 +2,15 @@ import streamlit as st
 import os
 import sys
 import time
+from dotenv import load_dotenv
 
 # Robust path setup for deployment
 current_dir = os.path.dirname(os.path.abspath(__file__))
 # Ensure we can import from utils
 sys.path.append(current_dir)
+
+# Load environment variables explicitly
+load_dotenv(os.path.join(current_dir, "../.env"))
 
 from utils.paths import DATA_DIR, CONFIG_DIR, add_src_to_path
 add_src_to_path()
@@ -20,6 +24,51 @@ st.set_page_config(
     page_icon="🤖",
     layout="wide"
 )
+
+# ---------------------------------------------------------
+# Simple Password Authentication
+# ---------------------------------------------------------
+APP_PASSWORD = os.getenv("APP_PASSWORD", "")
+
+def check_password():
+    """Returns `True` if the user had the correct password."""
+    if not APP_PASSWORD:
+        return True
+
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        if st.session_state["password"] == APP_PASSWORD:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # don't store password
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # First run, show input for password.
+        st.text_input(
+            "Please enter the password to access the assistant:", 
+            type="password", 
+            on_change=password_entered, 
+            key="password"
+        )
+        return False
+    elif not st.session_state["password_correct"]:
+        # Password incorrect, show input + error.
+        st.text_input(
+            "Please enter the password to access the assistant:", 
+            type="password", 
+            on_change=password_entered, 
+            key="password"
+        )
+        st.error("😕 Password incorrect")
+        return False
+    else:
+        # Password correct.
+        return True
+
+if not check_password():
+    st.stop()
+# ---------------------------------------------------------
 
 # Initialize Resources (Cached)
 @st.cache_resource
