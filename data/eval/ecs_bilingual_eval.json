@@ -1,0 +1,94 @@
+[
+  {
+    "id": "Q1",
+    "zh_query": "ESSD_FlexPL 是什么？",
+    "en_query": "What is ESSD FlexPL volume?",
+    "targets": [
+      { "title_contains": "ESSD FlexPL" },
+      { "url_contains": "FlexPL" }
+    ]
+  },
+  {
+    "id": "Q2",
+    "zh_query": "如何创建卷的快照？",
+    "en_query": "How to create a snapshot for a volume?",
+    "targets": [
+      { "title_contains": "Create snapshots" },
+      { "url_contains": "Snapshot" }
+    ]
+  },
+  {
+    "id": "Q3",
+    "zh_query": "如何回滚卷到某个快照？",
+    "en_query": "How to roll back a volume using a snapshot?",
+    "targets": [
+      { "title_contains": "RollbackVolume" },
+      { "url_contains": "Rollback" }
+    ]
+  },
+  {
+    "id": "Q4",
+    "zh_query": "如何购买与现有实例相同配置的实例？",
+    "en_query": "How to purchase an ECS instance with the same configuration as an existing one?",
+    "targets": [
+      { "title_contains": "Purchase an ECS instance with the same configuration" },
+      { "url_contains": "Buying-ECS-instances-that-use-the-same-configuration" }
+    ]
+  },
+  {
+    "id": "Q5",
+    "zh_query": "如何查看哪些区域在售实例？",
+    "en_query": "How to view regions where instances are available for sale?",
+    "targets": [
+      { "title_contains": "Viewing regions where instances are available for sale" },
+      { "url_contains": "Viewing_regions_where_instances_are_available_for_sale" }
+    ]
+  },
+  {
+    "id": "Q6",
+    "zh_query": "如何删除自定义镜像？",
+    "en_query": "How to delete a custom image?",
+    "targets": [
+      { "title_contains": "Deleting custom images" },
+      { "url_contains": "Deleting-custom-images" }
+    ]
+  },
+  {
+    "id": "Q7",
+    "zh_query": "如何在控制台修改网络接口的MTU值？",
+    "en_query": "How to manage MTU values of network interfaces in the console?",
+    "targets": [
+      { "title_contains": "Managing MTU values of network interfaces" },
+      { "url_contains": "MTU" }
+    ]
+  },
+  {
+    "id": "Q8",
+    "zh_query": "如何使用Linux主机登录Windows实例？",
+    "en_query": "How to use a Linux host to log on to a Windows instance?",
+    "targets": [
+      { "title_contains": "Using a Linux host to log on to a Windows instance" },
+      { "url_contains": "Using-a-Linux-host-to-log-on-to-a-Windows-instance" }
+    ]
+  },
+  {
+    "id": "Q9",
+    "zh_query": "如何查看和配置自动快照策略？",
+    "en_query": "How to create and modify automatic snapshot policies?",
+    "targets": [
+      { "title_contains": "ModifyAutoSnapshotPolicy" },
+      { "title_contains": "Creates an auto snapshot policy" },
+      { "url_contains": "Snapshot" }
+    ]
+  },
+  {
+    "id": "Q10",
+    "zh_query": "什么是计划维护时间窗口？",
+    "en_query": "What is the scheduled maintenance window?",
+    "targets": [
+      { "title_contains": "Scheduled maintenance window" },
+      { "url_contains": "maintenance" }
+    ]
+  }
+]
+
